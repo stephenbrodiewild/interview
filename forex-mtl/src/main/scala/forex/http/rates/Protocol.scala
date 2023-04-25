@@ -7,6 +7,8 @@ import forex.domain._
 import io.circe._
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
+import io.circe.generic.extras.semiauto.deriveConfiguredDecoder
+import forex.programs.rates.errors
 
 object Protocol {
 
@@ -17,6 +19,8 @@ object Protocol {
       to: Currency
   )
 
+  type OneFrameGetResponse = List[OneFrameRate]
+  
   final case class GetApiResponse(
       from: Currency,
       to: Currency,
@@ -35,5 +39,17 @@ object Protocol {
 
   implicit val responseEncoder: Encoder[GetApiResponse] =
     deriveConfiguredEncoder[GetApiResponse]
+
+  implicit val oneFrameRateDecoder: Decoder[OneFrameRate] = 
+    deriveConfiguredDecoder[OneFrameRate]
+
+  implicit val currencyDecoder: Decoder[Currency] = 
+    Decoder.instance[Currency] {
+      hc => Right(Currency.fromString(hc.value.asString.get))
+    }
+
+  implicit val oneFrameGetResponseDecoder: Decoder[OneFrameGetResponse] = Decoder.decodeList[OneFrameRate]
+
+  implicit val errorEncoder: Encoder[errors.Error] = deriveConfiguredEncoder[errors.Error]
 
 }
