@@ -28,6 +28,10 @@ object Protocol {
       timestamp: Timestamp
   )
 
+  final case class ErrorResponse(
+    error: String
+  )
+
   implicit val currencyEncoder: Encoder[Currency] =
     Encoder.instance[Currency] { show.show _ andThen Json.fromString }
 
@@ -52,4 +56,7 @@ object Protocol {
 
   implicit val errorEncoder: Encoder[errors.Error] = deriveConfiguredEncoder[errors.Error]
 
+  implicit class EntityEncoderUtil[F[_], E](e: E)(implicit encoder: Encoder[E]){
+    
+  }
 }
