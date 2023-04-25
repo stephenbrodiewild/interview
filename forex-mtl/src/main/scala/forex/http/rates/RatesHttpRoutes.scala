@@ -8,17 +8,24 @@ import forex.programs.rates.{ Protocol => RatesProgramProtocol }
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.Router
+import org.http4s.EntityEncoder
+import org.http4s.circe._
+
+import forex.programs.rates.errors.Error
 
 class RatesHttpRoutes[F[_]: Sync](rates: RatesProgram[F]) extends Http4sDsl[F] {
 
   import Converters._, QueryParams._, Protocol._
 
   private[http] val prefixPath = "/rates"
+  
+  implicit val x: EntityEncoder[F, Error] = jsonEncoderOf[F, Error]
 
   private val httpRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root :? FromQueryParam(from) +& ToQueryParam(to) =>
-      rates.get(RatesProgramProtocol.GetRatesRequest(from, to)).flatMap(Sync[F].fromEither).flatMap { rate =>
-        Ok(rate.asGetApiResponse)
+      rates.get(RatesProgramProtocol.GetRatesRequest(from, to)).flatMap{
+        case Left(err) => BadRequest(err)
+        case Right(rate) => Ok(rate.asGetApiResponse)
       }
   }
 
