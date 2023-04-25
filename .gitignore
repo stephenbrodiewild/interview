@@ -21,3 +21,7 @@ TAGS
 tests.iml
 # Auto-copied by sbt-microsites
 docs/src/main/tut/contributing.md
+.vscode
+.bloop
+.metals
+project
