@@ -83,6 +83,9 @@ $ curl -H "token: 10dc303535874aeccc86a8251e6992f5" 'localhost:8080/rates?pair=U
 [{"from":"USD","to":"JPY","bid":0.61,"ask":0.82,"price":0.71,"time_stamp":"2019-01-01T00:00:00.000"}]
 ```
 
+__Example httpie request__
+$ http get '0.0.0.0:8081/rates?from=USD&to=JPY'
+
 ## F.A.Q.
 1) _Is it OK to share your solutions publicly?_
 Yes, the questions are not prescriptive, the process and discussion around the code is the valuable part. You do the work, you own the code. Given we are asking you to give up your time, it is entirely reasonable for you to keep and use your solution as you see fit.
