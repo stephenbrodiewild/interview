@@ -55,8 +55,4 @@ object Protocol {
   implicit val oneFrameGetResponseDecoder: Decoder[OneFrameGetResponse] = Decoder.decodeList[OneFrameRate]
 
   implicit val errorEncoder: Encoder[errors.Error] = deriveConfiguredEncoder[errors.Error]
-
-  implicit class EntityEncoderUtil[F[_], E](e: E)(implicit encoder: Encoder[E]){
-    
-  }
 }
