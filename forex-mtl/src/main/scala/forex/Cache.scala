@@ -43,21 +43,20 @@ class Cache[F[_]: ConcurrentEffect: Timer](private val ref: Ref[F, Map[Rate.Pair
 
     private def callOneFrameService: F[Either[Error, RateCache]] = {
 
-        val noParamUri: Uri =
+        val uri: Uri =
             Uri(authority = Some(Uri.Authority(host = Uri.RegName(config.host), port= Some(config.port))))
                 .withPath("rates")
-
-        val paramUri = noParamUri.withMultiValueQueryParams(
-            Map(
-                "pair" -> Rate.pairs.map{
-                    case Rate.Pair(from, to) => from.show+to.show
-                }
-            )
-        )
+                .withMultiValueQueryParams(
+                    Map(
+                        "pair" -> Rate.pairs.map{
+                            case Rate.Pair(from, to) => from.show+to.show
+                        }
+                    )
+                )
 
         val req: Request[F] = Request(
             method = GET,
-            uri = paramUri,
+            uri = uri,
             headers = Headers.of(Header("token", config.token))
         )
 
