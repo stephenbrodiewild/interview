@@ -10,9 +10,9 @@ import org.http4s.implicits._
 import org.http4s.server.middleware.{ AutoSlash, Timeout }
 import cats.effect.ConcurrentEffect
 
-class Module[F[_]: Timer: ConcurrentEffect](config: ApplicationConfig) {
+class Module[F[_]: Timer: ConcurrentEffect](config: ApplicationConfig, cache: Cache[F]) {
 
-  private val ratesService: RatesService[F] = RatesServices.noCache[F](config.oneFrame)
+  private val ratesService: RatesService[F] = RatesServices.useCache[F](cache)
 
   private val ratesProgram: RatesProgram[F] = RatesProgram[F](ratesService)
 

@@ -19,11 +19,14 @@ class Application[F[_]: ConcurrentEffect: Timer] {
   def stream(ec: ExecutionContext): Stream[F, Unit] =
     for {
       config <- Config.stream("app")
-      module = new Module[F](config)
-      _ <- BlazeServerBuilder[F](ec)
+      cache  <- Stream.eval(forex.Cache.apply[F](ec, config.oneFrame))
+      module = new Module[F](config, cache)
+      serverStream = BlazeServerBuilder[F](ec)
             .bindHttp(config.http.port, config.http.host)
             .withHttpApp(module.httpApp)
             .serve
+      cacheStream = cache.refresh
+      _ <- serverStream concurrently cacheStream
     } yield ()
 
 }
