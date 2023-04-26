@@ -27,12 +27,9 @@ import forex.domain.Price
 class Cache[F[_]: ConcurrentEffect: Timer](private val ref: Ref[F, Map[Rate.Pair, Rate]], val config: OneFrameConfig, val ec: ExecutionContext){
 
     type RateCache = Map[Rate.Pair, Rate]
-    object RateCache{
-        def frameRatesToCache(oneFrameRates: List[OneFrameRate]): RateCache = ???
-    }
 
-    def refresh: Stream[F, Unit] =
-        Stream.repeatEval{
+    def refresh: Stream[F, Unit] = {
+        val refresh =  
             for {
                 newCacheOrError <- callOneFrameService
                 _ <- newCacheOrError match {
@@ -40,8 +37,9 @@ class Cache[F[_]: ConcurrentEffect: Timer](private val ref: Ref[F, Map[Rate.Pair
                     case Right(rates) => ref.set(rates)
                 }
             } yield ()
-        }.metered(config.refreshInterval)
 
+        Stream.eval(refresh) ++ Stream.repeatEval(refresh).metered(config.refreshInterval)
+    }
 
     private def callOneFrameService: F[Either[Error, RateCache]] = {
 
@@ -56,8 +54,6 @@ class Cache[F[_]: ConcurrentEffect: Timer](private val ref: Ref[F, Map[Rate.Pair
                 }
             )
         )
-
-        println(paramUri)
 
         val req: Request[F] = Request(
             method = GET,
