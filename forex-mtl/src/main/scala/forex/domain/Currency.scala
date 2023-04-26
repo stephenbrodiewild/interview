@@ -39,4 +39,5 @@ object Currency {
     case "USD" => USD
   }
 
+  val currencies = List(AUD, CAD, CHF, EUR, GBP, NZD, JPY, SGD, USD)
 }
