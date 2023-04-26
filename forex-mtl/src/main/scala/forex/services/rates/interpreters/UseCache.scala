@@ -10,9 +10,9 @@ import cats.effect.ConcurrentEffect
 
 class UseCache[F[_]: ConcurrentEffect](cache: Cache[F]) extends Algebra[F] {
 
-  override def get(pair: Rate.Pair): F[Error Either Rate] = 
-    cache.get(pair).value.map{
-      case None => Left(Error.OneFrameLookupFailed(pair.toString()))
+  override def get(pair: Rate.Pair): F[Error Either Rate] =
+    cache.get(pair).value.map {
+      case None        => Left(Error.OneFrameLookupFailed(pair.toString()))
       case Some(value) => Right(value)
     }
 }

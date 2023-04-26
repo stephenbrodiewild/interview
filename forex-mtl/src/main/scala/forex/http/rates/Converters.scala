@@ -18,6 +18,6 @@ object Converters {
 
   private[rates] implicit class GetErrorResponseOps(val err: Error) extends AnyVal {
     def asErrorResponse: ErrorResponse =
-     ErrorResponse(err.toString)
+      ErrorResponse(err.toString)
   }
 }

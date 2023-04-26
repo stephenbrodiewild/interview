@@ -1,6 +1,6 @@
 package forex
 
-import cats.effect.{ Timer }
+import cats.effect.Timer
 import forex.config.ApplicationConfig
 import forex.http.rates.RatesHttpRoutes
 import forex.services._
@@ -21,11 +21,9 @@ class Module[F[_]: Timer: ConcurrentEffect](config: ApplicationConfig, cache: Ca
   type PartialMiddleware = HttpRoutes[F] => HttpRoutes[F]
   type TotalMiddleware   = HttpApp[F] => HttpApp[F]
 
-  private val routesMiddleware: PartialMiddleware = {
-    { http: HttpRoutes[F] =>
+  private val routesMiddleware: PartialMiddleware =
+    http: HttpRoutes[F] =>
       AutoSlash(http)
-    }
-  }
 
   private val appMiddleware: TotalMiddleware = { http: HttpApp[F] =>
     Timeout(config.http.timeout)(http)

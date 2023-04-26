@@ -20,7 +20,7 @@ object Protocol {
   )
 
   type OneFrameGetResponse = List[OneFrameRate]
-  
+
   final case class GetApiResponse(
       from: Currency,
       to: Currency,
@@ -29,11 +29,11 @@ object Protocol {
   )
 
   final case class ErrorResponse(
-    error: String
+      error: String
   )
 
   implicit val currencyEncoder: Encoder[Currency] =
-    Encoder.instance[Currency] { show.show _ andThen Json.fromString }
+    Encoder.instance[Currency](show.show _ andThen Json.fromString)
 
   implicit val pairEncoder: Encoder[Pair] =
     deriveConfiguredEncoder[Pair]
@@ -44,12 +44,12 @@ object Protocol {
   implicit val responseEncoder: Encoder[GetApiResponse] =
     deriveConfiguredEncoder[GetApiResponse]
 
-  implicit val oneFrameRateDecoder: Decoder[OneFrameRate] = 
+  implicit val oneFrameRateDecoder: Decoder[OneFrameRate] =
     deriveConfiguredDecoder[OneFrameRate]
 
-  implicit val currencyDecoder: Decoder[Currency] = 
-    Decoder.instance[Currency] {
-      hc => Right(Currency.fromString(hc.value.asString.get))
+  implicit val currencyDecoder: Decoder[Currency] =
+    Decoder.instance[Currency] { hc =>
+      Right(Currency.fromString(hc.value.asString.get))
     }
 
   implicit val oneFrameGetResponseDecoder: Decoder[OneFrameGetResponse] = Decoder.decodeList[OneFrameRate]
