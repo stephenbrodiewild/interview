@@ -23,6 +23,12 @@ import org.http4s.circe._
 import forex.programs.rates.errors._
 import fs2._
 import forex.domain.Price
+import scala.concurrent.duration.FiniteDuration
+
+object helpers {
+  def evalThenRepeatEval[F[_]: Timer, A](x: F[A], every: FiniteDuration): Stream[F, A] =
+    Stream.eval(x) ++ Stream.repeatEval(x).metered(every)
+}
 
 class Cache[F[_]: ConcurrentEffect: Timer](
     private val ref: Ref[F, Map[Rate.Pair, Rate]],
@@ -32,8 +38,7 @@ class Cache[F[_]: ConcurrentEffect: Timer](
 
   type RateCache = Map[Rate.Pair, Rate]
 
-  def refresh: Stream[F, Unit] = {
-    val refresh =
+  private def refreshCache: F[Unit] = 
       for {
         newCacheOrError <- callOneFrameService
         _ <- newCacheOrError match {
@@ -42,8 +47,7 @@ class Cache[F[_]: ConcurrentEffect: Timer](
              }
       } yield ()
 
-    Stream.eval(refresh) ++ Stream.repeatEval(refresh).metered(config.refreshInterval)
-  }
+  def refreshStream = helpers.evalThenRepeatEval(refreshCache, config.refreshInterval)
 
   private def callOneFrameService: F[Either[Error, RateCache]] = {
 
@@ -63,7 +67,7 @@ class Cache[F[_]: ConcurrentEffect: Timer](
       uri = uri,
       headers = Headers.of(Header("token", config.token))
     )
-
+    
     implicit val x: EntityDecoder[F, Protocol.OneFrameGetResponse] = jsonOf[F, Protocol.OneFrameGetResponse]
 
     def oneFrameValueToCache(of: Protocol.OneFrameGetResponse): RateCache =

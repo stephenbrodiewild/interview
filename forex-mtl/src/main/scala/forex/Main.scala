@@ -25,7 +25,7 @@ class Application[F[_]: ConcurrentEffect: Timer] {
                        .bindHttp(config.http.port, config.http.host)
                        .withHttpApp(module.httpApp)
                        .serve
-      cacheStream = cache.refresh
+      cacheStream = cache.refreshStream
       _ <- serverStream concurrently cacheStream
     } yield ()
 
